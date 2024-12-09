@@ -40,14 +40,6 @@ def analyze_image_block(image_block, block_coords, threshold=100, blur_sigma=1):
         size = len(coords)
         brightness = image_block[coords[:, 0], coords[:, 1]].mean()
 
-        if size < 50:
-            obj_type = "Very Small Object"
-        elif size < 300:
-            obj_type = "Small Object"
-        elif size < 1000:
-            obj_type = "Medium Object"
-        else:
-            obj_type = "Large Object"
 
         objects.append({
             "x_center": (min_x + max_x) // 2,
@@ -55,8 +47,7 @@ def analyze_image_block(image_block, block_coords, threshold=100, blur_sigma=1):
             "width": width,
             "height": height,
             "size": size,
-            "brightness": brightness,
-            "type": obj_type
+            "brightness": brightness
         })
 
     return objects
@@ -97,7 +88,7 @@ def process_single_image(args):
         for obj in results:
             x, y = obj["x_center"], obj["y_center"]
             width, height = obj["width"], obj["height"]
-            obj_type = obj["type"]
+            obj_type = str(obj["brightness"])
 
             draw.rectangle([y - width // 2, x - height // 2, y + width // 2, x + height // 2], outline="red", width=2)
             draw.text((y + 5, x - 10), obj_type, fill="white")
@@ -109,7 +100,7 @@ def process_single_image(args):
             for obj in results:
                 writer.writerow([image_name, obj["x_center"], obj["y_center"],
                                  obj["width"], obj["height"], obj["size"],
-                                 obj["brightness"], obj["type"]])
+                                 obj["brightness"]])
 
         return f"Обработано: {image_name}, найдено объектов: {len(results)}"
 
@@ -143,7 +134,7 @@ def start_processing():
     stats_file_path = os.path.join(output_folder, "statistics.csv")
     with open(stats_file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["Image", "X Center", "Y Center", "Width", "Height", "Size", "Brightness", "Type"])
+        writer.writerow(["Image", "X Center", "Y Center", "Width", "Height", "Size", "Brightness"])
 
     progress_bar["maximum"] = len(image_files)
     progress_bar["value"] = 0
